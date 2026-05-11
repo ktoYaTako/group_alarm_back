@@ -4,8 +4,8 @@ services:
   backend:
     image: groupalarm-backend:latest
     container_name: groupalarm-backend
-    expose:
-      - "3000"
+    ports:
+      - "80:3000"
     env_file:
       - .env
     restart: unless-stopped
@@ -20,26 +20,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    networks:
-      - app-network
-
-  nginx:
-    image: nginx:alpine
-    container_name: groupalarm-nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/app.conf:ro
-    depends_on:
-      - backend
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - app-network
 
 networks:
   app-network:
