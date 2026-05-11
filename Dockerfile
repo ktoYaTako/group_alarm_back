@@ -23,6 +23,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
+COPY firebase-key.json ./firebase-key.json
 
 EXPOSE 3000
 
