@@ -24,9 +24,6 @@ export const fcmService = {
     const message: admin.messaging.Message = {
       data,
       topic,
-      android: {
-        priority: 'high',
-      },
     };
 
     return admin.messaging().send(message);
@@ -39,9 +36,6 @@ export const fcmService = {
     const message: admin.messaging.Message = {
       data,
       token,
-      android: {
-        priority: 'high',
-      },
     };
 
     return admin.messaging().send(message);
