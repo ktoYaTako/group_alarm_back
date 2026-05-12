@@ -32,20 +32,22 @@ router.post('/:teamId/alarm/trigger', authMiddleware, async (req: Request, res: 
     });
 
     const members = await firestoreService.getTeamMembers(teamId);
-    const data = {
-      teamId,
-      triggeredBy: uid,
-      triggeredAt: alarm.triggeredAt.toString(),
-    };
+    const triggeringMember = members.find(m => m.uid === uid);
+    const triggeringMemberName = triggeringMember?.nickname || 'Unknown';
 
     for (const member of members) {
       if (member.uid !== uid) {
         const user = await firestoreService.getUser(member.uid);
         if (user && user.fcmToken) {
-          await fcmService.sendToToken(user.fcmToken, data, {
+          const data = {
+            type: 'ALARM',
+            teamId,
+            triggeredBy: uid,
+            triggeredAt: alarm.triggeredAt.toString(),
             title: 'Alarm Triggered',
-            body: `Alarm triggered by ${member.nickname}`,
-          });
+            body: `Alarm triggered by ${triggeringMemberName}`,
+          };
+          await fcmService.sendToToken(user.fcmToken, data);
         }
       }
     }

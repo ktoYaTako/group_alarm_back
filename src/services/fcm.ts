@@ -22,14 +22,16 @@ export const fcmService = {
     data: Record<string, string>,
     notification?: { title: string; body: string }
   ): Promise<string> {
+    const messageData = { ...data };
+    if (notification) {
+      messageData.title = notification.title;
+      messageData.body = notification.body;
+    }
+
     const message: admin.messaging.Message = {
-      data,
+      data: messageData,
       topic,
     };
-
-    if (notification) {
-      message.notification = notification;
-    }
 
     return admin.messaging().send(message);
   },
@@ -39,14 +41,16 @@ export const fcmService = {
     data: Record<string, string>,
     notification?: { title: string; body: string }
   ): Promise<string> {
+    const messageData = { ...data };
+    if (notification) {
+      messageData.title = notification.title;
+      messageData.body = notification.body;
+    }
+
     const message: admin.messaging.Message = {
-      data,
+      data: messageData,
       token,
     };
-
-    if (notification) {
-      message.notification = notification;
-    }
 
     return admin.messaging().send(message);
   },
