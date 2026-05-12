@@ -19,18 +19,14 @@ export const fcmService = {
 
   async sendToTopic(
     topic: string,
-    data: Record<string, string>,
-    notification?: { title: string; body: string }
+    data: Record<string, string>
   ): Promise<string> {
-    const messageData = { ...data };
-    if (notification) {
-      messageData.title = notification.title;
-      messageData.body = notification.body;
-    }
-
     const message: admin.messaging.Message = {
-      data: messageData,
+      data,
       topic,
+      android: {
+        priority: 'high',
+      },
     };
 
     return admin.messaging().send(message);
@@ -38,18 +34,14 @@ export const fcmService = {
 
   async sendToToken(
     token: string,
-    data: Record<string, string>,
-    notification?: { title: string; body: string }
+    data: Record<string, string>
   ): Promise<string> {
-    const messageData = { ...data };
-    if (notification) {
-      messageData.title = notification.title;
-      messageData.body = notification.body;
-    }
-
     const message: admin.messaging.Message = {
-      data: messageData,
+      data,
       token,
+      android: {
+        priority: 'high',
+      },
     };
 
     return admin.messaging().send(message);
