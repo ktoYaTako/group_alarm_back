@@ -41,8 +41,8 @@ router.post('/:teamId/alarm/trigger', authMiddleware, async (req: Request, res: 
         if (user && user.fcmToken) {
           const data = {
             type: 'ALARM',
-            notificationTitle: 'Alarm Triggered',
-            notificationBody: `Alarm triggered by ${triggeringMemberName}`,
+            // notificationTitle: 'Alarm Triggered',
+            // notificationBody: `Alarm triggered by ${triggeringMemberName}`,
             teamId,
             triggeredBy: uid,
             triggeredAt: alarm.triggeredAt.toString(),
