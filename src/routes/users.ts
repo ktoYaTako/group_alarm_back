@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { firestoreService } from '../services/firestore';
-import { fcmService } from '../services/fcm';
 import { User } from '../types/models';
 
 const router = Router();

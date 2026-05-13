@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
+import * as admin from 'firebase-admin';
 import { authMiddleware } from '../middleware/auth';
 import { firestoreService } from '../services/firestore';
-import { fcmService } from '../services/fcm';
 import { eventStreamService } from '../services/eventStream';
 
 const router = Router();
@@ -32,23 +32,34 @@ router.post('/:teamId/alarm/trigger', authMiddleware, async (req: Request, res: 
     });
 
     const members = await firestoreService.getTeamMembers(teamId);
-    const triggeringMember = members.find(m => m.uid === uid);
-    const triggeringMemberName = triggeringMember?.nickname || 'Unknown';
 
+    // Collect FCM tokens from all members except the one who triggered the alarm
+    const fcmTokens: string[] = [];
     for (const member of members) {
       if (member.uid !== uid) {
         const user = await firestoreService.getUser(member.uid);
         if (user && user.fcmToken) {
-          const data = {
-            type: 'ALARM',
-            // notificationTitle: 'Alarm Triggered',
-            // notificationBody: `Alarm triggered by ${triggeringMemberName}`,
-            teamId,
-            triggeredBy: uid,
-            triggeredAt: alarm.triggeredAt.toString(),
-          };
-          await fcmService.sendToToken(user.fcmToken, data);
+          fcmTokens.push(user.fcmToken);
         }
+      }
+    }
+
+    // Send multicast message with data-only payload
+    if (fcmTokens.length > 0) {
+      const message = {
+        data: {
+          type: 'ALARM',
+          teamId,
+          triggeredBy: uid,
+          triggeredAt: alarm.triggeredAt.toString(),
+        },
+        tokens: fcmTokens,
+      };
+
+      try {
+        await admin.messaging().sendMulticast(message as any);
+      } catch (error) {
+        console.error('Failed to send FCM multicast message:', error);
       }
     }
 
