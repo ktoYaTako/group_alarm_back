@@ -51,7 +51,7 @@ router.post('/:teamId/alarm/trigger', authMiddleware, async (req: Request, res: 
 
     // Send multicast message with data-only payload
     if (fcmTokens.length > 0) {
-      const message = {
+      const message: admin.messaging.MulticastMessage = {
         data: {
           type: 'ALARM',
           teamId,
@@ -63,8 +63,8 @@ router.post('/:teamId/alarm/trigger', authMiddleware, async (req: Request, res: 
 
       console.error(`[FCM] Sending multicast message to ${fcmTokens.length} devices`);
       try {
-        await admin.messaging().sendMulticast(message as any);
-        console.error(`[FCM] ✅ Multicast message sent successfully`);
+        const response = await admin.messaging().sendEachForMulticast(message);
+        console.error(`[FCM] ✅ Multicast message sent successfully. Success: ${response.successCount}, Failed: ${response.failureCount}`);
       } catch (error) {
         console.error('[FCM] ❌ Failed to send FCM multicast message:', error);
         // Don't throw, continue execution
