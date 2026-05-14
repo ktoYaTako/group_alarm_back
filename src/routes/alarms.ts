@@ -97,7 +97,30 @@ router.post('/:teamId/alarm/acknowledge', authMiddleware, async (req: Request, r
       return;
     }
 
+    console.log(`[ALARM] User ${uid} acknowledging alarm in team ${teamId}`);
+    console.log(`[ALARM] Current acknowledgedBy BEFORE:`, team.alarm.acknowledgedBy);
+
     const alarm = await firestoreService.acknowledgeAlarm(teamId, uid);
+
+    console.log(`[ALARM] Current acknowledgedBy AFTER:`, alarm.acknowledgedBy);
+
+    const members = await firestoreService.getTeamMembers(teamId);
+    const allMemberIds = members.map((m) => m.uid);
+    const allConfirmed = allMemberIds.every((id) => alarm.acknowledgedBy[id] === true);
+
+    console.log(`[ALARM] Current team members:`, allMemberIds);
+    console.log(`[ALARM] All confirmed?`, allConfirmed);
+
+    if (allConfirmed) {
+      console.log(`[ALARM] ✅ ALL CONFIRMED! Sending SSE event with full acknowledgedBy`);
+      console.log(`[ALARM] SSE event data:`, {
+        isActive: alarm.isActive,
+        acknowledgedBy: alarm.acknowledgedBy,
+      });
+    } else {
+      const missing = allMemberIds.filter((id) => !alarm.acknowledgedBy[id]);
+      console.log(`[ALARM] ❌ Not all confirmed yet. Missing:`, missing);
+    }
 
     // Send SSE event with full acknowledgedBy state
     eventStreamService.sendAlarmEvent(teamId, {
