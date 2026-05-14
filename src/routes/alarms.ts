@@ -97,19 +97,9 @@ router.post('/:teamId/alarm/acknowledge', authMiddleware, async (req: Request, r
       return;
     }
 
-    let alarm = await firestoreService.acknowledgeAlarm(teamId, uid);
+    const alarm = await firestoreService.acknowledgeAlarm(teamId, uid);
 
-    // Check if all members except the initiator have confirmed
-    const members = await firestoreService.getTeamMembers(teamId);
-    const otherMembers = members.filter((m) => m.uid !== alarm.triggeredBy);
-    const allOthersConfirmed = otherMembers.every((m) => alarm.acknowledgedBy[m.uid] === true);
-
-    if (allOthersConfirmed) {
-      // Auto-reset alarm when all have confirmed
-      alarm = await firestoreService.resetAlarm(teamId);
-    }
-
-    // Send SSE event
+    // Send SSE event with full acknowledgedBy state
     eventStreamService.sendAlarmEvent(teamId, {
       isActive: alarm.isActive,
       triggeredBy: alarm.triggeredBy,
