@@ -131,12 +131,14 @@ router.post('/:teamId/alarm/acknowledge', authMiddleware, async (req: Request, r
     }
 
     // Send SSE event with full acknowledgedBy state
+    console.error(`[ALARM] 📤 Sending SSE event to all connected clients...`);
     eventStreamService.sendAlarmEvent(teamId, {
       isActive: alarm.isActive,
       triggeredBy: alarm.triggeredBy,
       triggeredAt: alarm.triggeredAt,
       acknowledgedBy: alarm.acknowledgedBy,
     });
+    console.error(`[ALARM] 📤 SSE event sent`);
 
     res.json(alarm);
   } catch (error) {

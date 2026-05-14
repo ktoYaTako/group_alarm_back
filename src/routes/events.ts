@@ -21,6 +21,9 @@ router.get('/stream', authMiddleware, async (req: Request, res: Response): Promi
 
     const teamIds = user.teams || [];
 
+    console.error(`[SSE] 🔌 Client connected: ${userId}`);
+    console.error(`[SSE] 📋 Subscribed to teams:`, teamIds);
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -30,10 +33,12 @@ router.get('/stream', authMiddleware, async (req: Request, res: Response): Promi
 
     // Send initial connection message
     res.write(`data: connected|${userId}\n\n`);
+    console.error(`[SSE] ✅ Sent connection confirmation to ${userId}`);
 
     // Send current member status for all teams
     for (const teamId of teamIds) {
       const connectedUsers = eventStreamService.getConnectedUsers(teamId);
+      console.error(`[SSE] 👥 Team ${teamId} has ${connectedUsers.length} connected users:`, connectedUsers);
       connectedUsers.forEach((memberId) => {
         if (memberId !== userId) {
           res.write(`data: member_status|${teamId}|${memberId}|online\n\n`);
