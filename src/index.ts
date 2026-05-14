@@ -58,6 +58,9 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
 });
 
+console.error('[FIREBASE] Admin SDK initialized successfully');
+console.error('[FIREBASE] Project ID:', serviceAccount.projectId);
+
 // Import routes AFTER Firebase initialization
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
