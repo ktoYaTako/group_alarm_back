@@ -44,6 +44,11 @@ router.post('/:teamId/alarm/trigger', authMiddleware, async (req: Request, res: 
       }
     }
 
+    console.error(`[FCM] Collected ${fcmTokens.length} FCM tokens`);
+    if (fcmTokens.length > 0) {
+      console.error(`[FCM] Tokens:`, fcmTokens);
+    }
+
     // Send multicast message with data-only payload
     if (fcmTokens.length > 0) {
       const message = {
@@ -56,10 +61,13 @@ router.post('/:teamId/alarm/trigger', authMiddleware, async (req: Request, res: 
         tokens: fcmTokens,
       };
 
+      console.error(`[FCM] Sending multicast message to ${fcmTokens.length} devices`);
       try {
         await admin.messaging().sendMulticast(message as any);
+        console.error(`[FCM] ✅ Multicast message sent successfully`);
       } catch (error) {
-        console.error('Failed to send FCM multicast message:', error);
+        console.error('[FCM] ❌ Failed to send FCM multicast message:', error);
+        // Don't throw, continue execution
       }
     }
 
